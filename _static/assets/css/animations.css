@@ -91,6 +91,7 @@
 }
 
 /* === SCROLL REVEAL CLASSES === */
+/* Base: hidden state. JS adds .visible to reveal. */
 .reveal {
   opacity: 0;
   transform: translateY(40px);
@@ -116,6 +117,18 @@
 .reveal-delay-3 { transition-delay: 0.24s; }
 .reveal-delay-4 { transition-delay: 0.32s; }
 .reveal-delay-5 { transition-delay: 0.40s; }
+
+/* === SAFETY FALLBACK: if no JS, show everything after 3s === */
+/* This prevents content from being permanently hidden if JS fails */
+@keyframes reveal-safety {
+  to { opacity: 1; transform: none; filter: none; }
+}
+.reveal {
+  animation: reveal-safety 0.01s 3s forwards;
+}
+.reveal.visible {
+  animation: none;
+}
 
 /* === SCROLL INDICATOR === */
 .scroll-indicator {
@@ -174,6 +187,17 @@
   transition: transform 0.8s var(--ease), opacity 0.8s var(--ease);
 }
 .split-text.visible span { transform: translateY(0); opacity: 1; }
+
+/* Safety fallback: show split text after 3s */
+@keyframes split-text-safety {
+  to { transform: translateY(0); opacity: 1; }
+}
+.split-text span {
+  animation: split-text-safety 0.01s 3s forwards;
+}
+.split-text.visible span {
+  animation: none;
+}
 
 /* Word stagger for split text */
 .split-text span:nth-child(1) { transition-delay: 0.05s; }
@@ -358,33 +382,11 @@
   will-change: transform;
 }
 
-/* === SCROLL-DRIVEN ANIMATIONS (CSS-native, production-ready 2026) === */
-/* Falls back to IntersectionObserver in animations.js for older browsers */
-
-/* Scroll reveal — pure CSS, no JS needed in supporting browsers */
-@supports (animation-timeline: view()) {
-  .reveal,
-  .reveal--left,
-  .reveal--right,
-  .reveal--scale,
-  .reveal--blur {
-    animation: reveal-fade linear both;
-    animation-timeline: view();
-    animation-range: entry 0% entry 100%;
-  }
-
-  @keyframes reveal-fade {
-    from { opacity: 0; transform: translateY(40px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  /* Stagger children */
-  .stagger > * {
-    animation: reveal-fade linear both;
-    animation-timeline: view();
-    animation-range: entry 0% entry 100%;
-  }
-}
+/* === SCROLL-DRIVEN ANIMATIONS === */
+/* REMOVED: @supports animation-timeline: view() block
+   This caused content to be permanently hidden in browsers that
+   @supports the feature but don't implement it correctly (headless,
+   some mobile). The JS IntersectionObserver handles reveals reliably. */
 
 /* === REDUCED MOTION === */
 @media (prefers-reduced-motion: reduce) {

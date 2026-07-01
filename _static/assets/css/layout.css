@@ -144,11 +144,24 @@
 }
 
 /* === STAGGERED CHILDREN === */
-.stagger > * { opacity: 0; transform: translateY(30px); }
+.stagger > * { opacity: 0; transform: translateY(30px); transition: opacity 0.6s var(--ease), transform 0.6s var(--ease); }
 .stagger > *:nth-child(1) { transition-delay: 0.05s; }
 .stagger > *:nth-child(2) { transition-delay: 0.15s; }
 .stagger > *:nth-child(3) { transition-delay: 0.25s; }
 .stagger > *:nth-child(4) { transition-delay: 0.35s; }
 .stagger > *:nth-child(5) { transition-delay: 0.45s; }
 .stagger > *:nth-child(6) { transition-delay: 0.55s; }
-.stagger.visible > * { opacity: 1; transform: translateY(0); }
+.stagger.visible > *,
+.stagger > *.visible { opacity: 1; transform: translateY(0); }
+
+/* Safety fallback for stagger too */
+@keyframes stagger-safety {
+  to { opacity: 1; transform: none; }
+}
+.stagger > * {
+  animation: stagger-safety 0.01s 3.5s forwards;
+}
+.stagger.visible > *,
+.stagger > *.visible {
+  animation: none;
+}

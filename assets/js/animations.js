@@ -30,17 +30,17 @@
           }
         });
       },
-      { threshold: 0.12, rootMargin: "0px 0px -40px 0px" }
+      { threshold: 0.05, rootMargin: "0px 0px -20px 0px" }
     );
 
     items.forEach(function (el) { obs.observe(el); });
 
-    // Fallback: force all visible after 2.5s
+    // Fallback: force all visible after 1.5s
     setTimeout(function () {
       items.forEach(function (el) {
         if (!el.classList.contains("visible")) el.classList.add("visible");
       });
-    }, 2500);
+    }, 1500);
   }
 
   /* ----------------------------------------------------------------- *
@@ -107,10 +107,18 @@
    * ----------------------------------------------------------------- */
   function initCountUp() {
     const stats = $$("[data-count]");
-    if (!stats.length || prefersReducedMotion) {
-      stats.forEach(function (s) { s.textContent = s.dataset.count; });
+    if (!stats.length) return;
+
+    if (prefersReducedMotion) {
+      stats.forEach(function (s) {
+        const target = parseFloat(s.dataset.count);
+        const prefix = s.dataset.prefix || "";
+        s.textContent = prefix + target.toLocaleString("nl-NL");
+      });
       return;
     }
+
+    let allCounted = false;
 
     const obs = new IntersectionObserver(function (entries, o) {
       entries.forEach(function (entry) {
@@ -138,9 +146,25 @@
         requestAnimationFrame(animate);
         o.unobserve(el);
       });
-    }, { threshold: 0.5 });
+    }, { threshold: 0.3 });
 
     stats.forEach(function (s) { obs.observe(s); });
+
+    // Fallback: if stats haven't counted up after 2s, show final values
+    setTimeout(function () {
+      if (allCounted) return;
+      stats.forEach(function (s) {
+        const target = parseFloat(s.dataset.count);
+        const prefix = s.dataset.prefix || "";
+        const suffix = s.dataset.suffix || "";
+        const current = s.textContent;
+        // Only replace if still showing 0
+        if (current === "0" || current === "€0") {
+          s.textContent = prefix + target.toLocaleString("nl-NL") + suffix;
+        }
+      });
+      allCounted = true;
+    }, 2000);
   }
 
   /* ----------------------------------------------------------------- *
