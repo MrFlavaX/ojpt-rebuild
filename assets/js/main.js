@@ -108,6 +108,10 @@
       { threshold: 0.12, rootMargin: "0px 0px -40px 0px" }
     );
     items.forEach((el) => obs.observe(el));
+    // Fallback: force all visible after 2.5s if IntersectionObserver hasn't fired
+    setTimeout(function() {
+      items.forEach(function(el) { if (!el.classList.contains('visible')) el.classList.add('visible'); });
+    }, 2500);
   }
 
   /* ----------------------------------------------------------------- *
