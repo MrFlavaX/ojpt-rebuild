@@ -1,0 +1,121 @@
+# =====================================================================
+# OJPT.nl — .htaccess for Hostinger shared hosting
+# Handles: clean URLs, gzip, caching, security, HTTPS, errors
+# =====================================================================
+
+# --- Force HTTPS ---
+# Disabled for local Docker development — uncomment for Hostinger production
+RewriteEngine On
+#RewriteCond %{HTTPS} off
+#RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# --- www to non-www ---
+# Disabled for local Docker — uncomment for production
+#RewriteCond %{HTTP_HOST} ^www\.(.*)$ [NC]
+#RewriteRule ^(.*)$ https://%1/$1 [L,R=301]
+
+# --- Clean URLs: LiteSpeed-compatible approach ---
+# Step 1: Internally strip trailing slash (except real directories)
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.+)/$ $1 [L]
+
+# Step 2: Try .php extension — /over-ons → over-ons.php
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME}.php -f
+RewriteRule ^(.*)$ $1.php [L,QSA]
+
+# Step 3: Try .html extension — /over-ons → over-ons.html
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME}.html -f
+RewriteRule ^(.*)$ $1.html [L,QSA]
+
+# --- Gzip Compression ---
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html
+  AddOutputFilterByType DEFLATE text/css
+  AddOutputFilterByType DEFLATE text/javascript
+  AddOutputFilterByType DEFLATE text/xml
+  AddOutputFilterByType DEFLATE application/javascript
+  AddOutputFilterByType DEFLATE application/x-javascript
+  AddOutputFilterByType DEFLATE application/json
+  AddOutputFilterByType DEFLATE application/xml
+  AddOutputFilterByType DEFLATE application/rss+xml
+  AddOutputFilterByType DEFLATE image/svg+xml
+  AddOutputFilterByType DEFLATE font/woff
+  AddOutputFilterByType DEFLATE font/woff2
+</IfModule>
+
+# --- Browser Caching ---
+<IfModule mod_expires.c>
+  ExpiresActive On
+  # CSS/JS — 1 year (immutable)
+  ExpiresByType text/css "access plus 1 year"
+  ExpiresByType application/javascript "access plus 1 year"
+  ExpiresByType text/javascript "access plus 1 year"
+  # Images — 1 year
+  ExpiresByType image/jpeg "access plus 1 year"
+  ExpiresByType image/png "access plus 1 year"
+  ExpiresByType image/svg+xml "access plus 1 year"
+  ExpiresByType image/webp "access plus 1 year"
+  ExpiresByType image/gif "access plus 1 year"
+  ExpiresByType image/x-icon "access plus 1 year"
+  # Fonts — 1 year
+  ExpiresByType font/woff "access plus 1 year"
+  ExpiresByType font/woff2 "access plus 1 year"
+  # HTML — revalidate
+  ExpiresByType text/html "access plus 0 seconds"
+  ExpiresByType application/json "access plus 0 seconds"
+  # Default
+  ExpiresDefault "access plus 1 month"
+</IfModule>
+
+# --- Cache-Control headers ---
+<IfModule mod_headers.c>
+  # Static assets — immutable
+  <FilesMatch "\.(css|js|woff|woff2|svg|png|jpg|jpeg|gif|webp|ico)$">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </FilesMatch>
+  # HTML — no-cache
+  <FilesMatch "\.(html|php)$">
+    Header set Cache-Control "no-cache, must-revalidate"
+  </FilesMatch>
+</IfModule>
+
+# --- Security Headers ---
+<IfModule mod_headers.c>
+  Header set X-Frame-Options "SAMEORIGIN" always
+  Header set X-Content-Type-Options "nosniff" always
+  Header set Referrer-Policy "strict-origin-when-cross-origin" always
+  Header set X-XSS-Protection "1; mode=block" always
+  Header set Permissions-Policy "camera=(), microphone=(), geolocation=(), interest-cohort=()" always
+  # HSTS
+  Header set Strict-Transport-Security "max-age=31536000; includeSubDomains; preload" always
+</IfModule>
+
+# --- Custom Error Pages ---
+ErrorDocument 404 /404.php
+ErrorDocument 500 /index.php
+
+# --- Protect sensitive files ---
+<FilesMatch "(^\.|\.(git|env|sql|bak|log|sh)$)">
+  Require all denied
+</FilesMatch>
+
+# Block directory listing
+Options -Indexes
+
+# --- Default charset ---
+AddDefaultCharset UTF-8
+
+# --- MIME types ---
+<IfModule mod_mime.c>
+  AddType image/svg+xml .svg
+  AddType font/woff .woff
+  AddType font/woff2 .woff2
+  AddType application/json .json
+</IfModule>
+
+# --- Directory index ---
+DirectoryIndex index.php index.html

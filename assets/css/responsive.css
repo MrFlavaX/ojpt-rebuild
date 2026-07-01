@@ -1,0 +1,86 @@
+/* =====================================================================
+   OJPT.nl — Responsive media queries
+   Mobile-first enhancement approach (but we start at desktop and reduce)
+   ===================================================================== */
+
+/* === TABLET (≤900px) === */
+@media (max-width: 900px) {
+  .main-nav { display: none; }
+  .hamburger { display: block; color: var(--color-text); }
+  .site-header.transparent .hamburger { color: var(--color-white); }
+
+  .split { grid-template-columns: 1fr; gap: var(--space-6); }
+  .split--reverse .split-media { order: 0; }
+  .split-media {
+    transform: skewY(-2deg);
+    max-width: 90%;
+    margin-inline: auto;
+  }
+  .split-media:hover { transform: skewY(-2deg) scale(1.02); }
+
+  .contact-grid { grid-template-columns: 1fr; }
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  .footer-grid { grid-template-columns: 1fr 1fr; }
+
+  .hero { background-attachment: scroll; min-height: 80vh; }
+  .event-card { grid-template-columns: 90px 1fr; }
+
+  .grid-3 { grid-template-columns: repeat(2, 1fr); }
+  .grid-4 { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* === VIEW TRANSITIONS (cross-page, progressive enhancement) === */
+@supports (view-transition-name: none) {
+  @view-transition {
+    navigation: auto;
+  }
+}
+
+/* === MOBILE (≤560px) === */
+@media (max-width: 560px) {
+  :root {
+    --header-h: 64px;
+  }
+
+  body { font-size: 16px; }
+
+  .section { padding-block: var(--space-8); }
+  .section--purple { min-height: 70vh; }
+
+  .stats-grid { grid-template-columns: 1fr; }
+  .footer-grid { grid-template-columns: 1fr; }
+  .hero { min-height: 65vh; }
+
+  .countdown-box { min-width: 72px; padding: var(--space-3) var(--space-2); }
+  .carousel-slide { min-height: 70vh; padding: var(--space-8) var(--space-4); }
+
+  .footer-bottom { flex-direction: column; text-align: center; }
+  .donate-card { padding: var(--space-5); }
+
+  .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+
+  .hero-buttons { flex-direction: column; align-items: stretch; }
+  .hero-buttons .btn { width: 100%; }
+
+  .pijlers-grid { grid-template-columns: 1fr; }
+  .themes-grid { grid-template-columns: 1fr; }
+  .donate-grid { grid-template-columns: 1fr; }
+  .card-grid { grid-template-columns: 1fr; }
+}
+
+/* === LARGE DESKTOP (≥1440px) === */
+@media (min-width: 1440px) {
+  .container { max-width: var(--maxw-wide); }
+}
+
+/* === PRINT === */
+@media print {
+  .site-header, .mobile-menu, .mobile-overlay, .scroll-progress,
+  .scroll-indicator, .hamburger, .hero-buttons, .cta-banner,
+  .grain-overlay, .cursor-dot, .cursor-ring {
+    display: none !important;
+  }
+  body { color: black; background: white; }
+  .section { padding-block: 1rem; }
+  a::after { content: " (" attr(href) ")"; font-size: 0.8em; color: #666; }
+}
