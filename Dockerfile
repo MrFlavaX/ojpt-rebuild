@@ -1,18 +1,8 @@
-FROM nginx:alpine
+FROM nikolaik/python-nodejs:python3.11-nodejs20
 
-LABEL org.opencontainers.image.title="OJPT.nl rebuild"
-LABEL org.opencontainers.image.description="Static site for Onafhankelijk Jongerenpanel Toeslagen (OJPT)"
-LABEL org.opencontainers.image.author="OJPT"
+WORKDIR /app
+COPY . /app
 
-# Copy the static site into the nginx html root
-COPY . /usr/share/nginx/html
+EXPOSE 8090
 
-# Custom nginx config (SPA-style, gzip, caching, port 8080)
-COPY nginx.conf /etc/nginx/conf.d/default.conf
-
-EXPOSE 8080
-
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD wget -q -O- http://localhost:8080/ >/dev/null 2>&1 || exit 1
-
-CMD ["nginx", "-g", "daemon off;"]
+CMD ["python3", "-m", "http.server", "8090", "--bind", "0.0.0.0"]
